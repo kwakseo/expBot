@@ -1,0 +1,95 @@
+module Bandit
+  class Experiment
+    attr_accessor :name, :title, :description, :alternatives
+    @@instances = []
+
+    def self.create(name)
+      e = Experiment.new(:name => name)
+      yield e
+      e.validate!
+      e
+    end
+
+    def initialize(args=nil)
+      args.each { |k,v| send "#{k}=", v } unless args.nil?
+      @@instances << self
+      @storage = Bandit.storage
+    end
+
+    def self.instances
+      @@instances
+    end
+
+    def addKey(key)
+      @key = key
+    end
+
+    def getAlternatives()
+      p @key
+      @storage.getAlt(@key)
+    end
+
+    def choose(default=nil)
+      if default && alternatives.include?(default)
+        alt = default
+      else
+        alt = Bandit.player.choose_alternative(self)
+        @storage.incr_participants(self, alt)
+      end
+      alt
+    end
+
+    def convert!(alt, count=1)
+      @storage.incr_conversions(self, alt, count)
+    end
+
+    def getResponses()
+      @storage.getResArray()
+    end
+    def addResponse(res)
+      @storage.addRes(res)
+    end
+    def getQuestions()
+      @storage.getValue('::questions')
+    end
+    def addQuestion(q)
+      @storage.addValue('::questions', q)
+    end
+    def addAlternative(alt)
+      alternatives << @key + '#' + alt
+      @storage.addAlt(@key, alt)
+      @storage.incr_participants(self, @key + '#' + alt)
+      @storage.incr_conversions(self, @key + '#' + alt, 1)
+    end
+
+    def validate!
+      [:title, :alternatives].each { |field|        
+        unless send(field)
+          raise MissingConfigurationError, "#{field} must be set in experiment #{name}"
+        end
+      }
+    end
+
+    def conversion_count(alt, date_hour=nil)
+      @storage.conversion_count(self, alt, date_hour)
+    end
+
+    def participant_count(alt, date_hour=nil)
+      @storage.participant_count(self, alt, date_hour)
+    end
+
+    def total_participant_count(date_hour=nil)
+      @storage.total_participant_count(self, date_hour)
+    end
+
+    def conversion_rate(alt)
+      pcount = participant_count(alt)
+      ccount = conversion_count(alt)
+      (pcount == 0 or ccount == 0) ? 0 : (ccount.to_f / pcount.to_f * 100.0)
+    end
+
+    def alternative_start(alt)
+      @storage.alternative_start_time(self, alt)
+    end
+  end
+end
