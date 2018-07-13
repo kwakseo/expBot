@@ -15,7 +15,7 @@ class Bandits():
 #        self.max_prob = np.amax(self.bandits)
 
         self.numArms = size
-        self.banditStats = np.zeros((size,), dtype=[('wins', np.int ), ('losses', np.int)])
+        self.banditStats = np.zeros((size,), dtype=[('wins', np.int ), ('losses', np.int), ('observations', np.int)])
 
         def draw_bandit_distribution(stats):
             ''' 
@@ -44,11 +44,11 @@ class Bandits():
 
     def addArm(self):
         if self.banditStats.size == 0 :
-            self.banditStats = np.zeros((1,), dtype=[('wins', np.int ), ('losses', np.int)])
+            self.banditStats = np.zeros((1,), dtype=[('wins', np.int ), ('losses', np.int), ('observations', np.int)])
             self.bandits = np.random.random_sample(1)
 
         else :
-            z = np.zeros((1,), dtype=[('wins', np.int ), ('losses', np.int)])
+            z = np.zeros((1,), dtype=[('wins', np.int ), ('losses', np.int), ('observations', np.int])
             self.banditStats = np.append(self.banditStats, z)
             self.bandits = np.append(self.bandits, np.random.random_sample(1))
 
@@ -67,21 +67,30 @@ class Bandits():
 
     def lose(self, bandit, loss):
         self.banditStats[bandit]['losses'] += loss 
-
+                                      
+    def observe(self, bandit):
+        self.banditStats[bandit]['observations'] += 1
+                                      
     def setWin(self, bandit, value):
         self.banditStats[bandit]['wins'] = value
 
     def setLose(self, bandit, value):
         self.banditStats[bandit]['losses'] = value
     
+    def setObservations(self, bandit, value):
+        self.banditStats[bandit]['observations'] = value
+                                      
     def getWin(self, bandit) :
         return self.banditStats[bandit]['wins']
 
     def getLose(self, bandit) :
         return self.banditStats[bandit]['losses']
-
+    
+    def getObservations(self, bandit):
+        return self.banditStats[bandit]['observations']
+                                      
     def select(self, number):
-        ''' Select a bandit, retuns whether it poduces an award or not '''
+        ''' Select a bandit, retuns whether it produces an award or not '''
 
         if (number < 0) or (number >= self.bandits.size):
            return False # Out of range
