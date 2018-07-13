@@ -14,12 +14,13 @@ reload(sys)
 sys.setdefaultencoding('utf8')
 
 ########### INIIALIZE ###########
-
 INITIAL = 0
 GOT_RESPONSE = 1
 SUGGESTION = 2
 NOT_SATISFIED = 3
 
+MAX_RATING = 5
+VALID_RATINGS = {'1','2','3','4','5'}
 questionList = []
 
 userQuestionIdx = {}
@@ -179,7 +180,12 @@ def handleUserResponse(message, something):
 
                 userFacingResponseIdx[userId] = res 
 
-                message.reply('*' + resMsg + '*' + '\n\n' + 'Do you think it is an approproate answer? (yes/no)')
+                message.reply('*' + resMsg + '*' + '\n\n' + 'How satisfied are you with this response? Enter a number 1-5:\n' 
+                             + '1: Very dissatisfied\n' 
+                             + '2: Somewhat dissatisfied\n'
+                             + '3: Neutral\n'
+                             + '4: Somewhat satisfied\n'
+                             + '5: Very satisfied')
                 setUserState(userId, GOT_RESPONSE)
 
             else :
@@ -199,15 +205,17 @@ def handleUserResponse(message, something):
         userQuestion = userQuestionIdx[userId]
         userResponseIdx = userFacingResponseIdx[userId]
 
-        if msg == 'yes' :
-            markWin(userQuestion, userResponseIdx, 1)
-            message.reply('cool! Thank you for your opinion!')
-            setUserState(userId, INITIAL)
+        if msg in VALID_RATINGS:
+            rating = int(msg)
+            markWin(userQuestion, userResponseIdx, rating)
+            markLose(userQuestion, userResponseIdx, MAX_RATING-rating)
             
-        elif msg == 'no' :
-            markLose(userQuestion, userResponseIdx, 1)
-            message.reply('What do you think is an appropriate response?')
-            setUserState(userId, NOT_SATISFIED)
+            if rating > MAX_RATING//2:
+                message.reply('cool! Thank you for your opinion!')
+                setUserState(userId, INITIAL)
+            else:
+                message.reply('What do you think is an appropriate response?')
+                setUserState(userId, NOT_SATISFIED)
         else :
             message.reply('Sorry, I do not understand')
     
