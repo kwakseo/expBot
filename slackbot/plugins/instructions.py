@@ -113,6 +113,9 @@ def markLose(questionIdx, resIdx, reward) :
     
     db['s' + str(questionIdx) + '_' + str(resIdx) + '_lose'] = myBandits[questionIdx].getLose(resIdx)
 
+def markObservation(questionIdx, resIdx):
+    myBandits[questionIdx].observe(resIdx)
+    
 def handleHi(userId, messageInstance, msgString) :
     response = 'Hi! Here are a list of messages that I can handle.\n\n'
 
