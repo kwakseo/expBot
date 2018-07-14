@@ -131,7 +131,7 @@ def handlePing(userId, messageInstance, msgString) :
         response += '*------ ' + questionList[i] + ' ------*' + '\n'
 
         for j in range(len(responseMapping[i])) :
-            response += responseMapping[i][j] + '\t' + str(myBandits[i].getStat()[j]) + '\n'
+            response += responseMapping[i][j] + '\t' + str(myBandits[i].getresStats(j)) + '\n'
 
         response += '\n'
 
