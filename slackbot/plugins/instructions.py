@@ -56,13 +56,19 @@ for i in range(numQuestions) :
 
         winKey = statPrefix + '_' + 'win'
         loseKey = statPrefix + '_' + 'lose'
+        obsKey = statPrefix + '_' + 'obs'
+        avgKey = statPrefix + '_' + 'avg'
 
         winCount = int(db[winKey])
         loseCount = int(db[loseKey])
+        obsCount = int(db[obsKey])
+        avgCount = float(db[avgKey])
 
         myBandits[i].addArm()
         myBandits[i].setWin(j, winCount)
         myBandits[i].setLose(j, loseCount)
+        myBandits[i].setNumObs(j, winCount)
+        myBandits[i].setAverage(j, loseCount)
  
 #finally:
 #    s.close()
