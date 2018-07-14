@@ -15,7 +15,7 @@ class Bandits():
 #        self.max_prob = np.amax(self.bandits)
 
         self.numArms = size
-        self.banditStats = np.zeros((size,), dtype=[('wins', np.int ), ('losses', np.int), ('observations', np.int)])
+        self.banditStats = np.zeros((size,), dtype=[('wins', np.int ), ('losses', np.int), ('obs', np.int)])
 
         def draw_bandit_distribution(stats):
             ''' 
@@ -44,11 +44,11 @@ class Bandits():
 
     def addArm(self):
         if self.banditStats.size == 0 :
-            self.banditStats = np.zeros((1,), dtype=[('wins', np.int ), ('losses', np.int), ('observations', np.int), ('average', np.float)])
+            self.banditStats = np.zeros((1,), dtype=[('wins', np.int ), ('losses', np.int), ('obs', np.int), ('avg', np.float)])
             self.bandits = np.random.random_sample(1)
 
         else :
-            z = np.zeros((1,), dtype=[('wins', np.int ), ('losses', np.int), ('observations', np.int], ('average', np.float))
+            z = np.zeros((1,), dtype=[('wins', np.int ), ('losses', np.int), ('obs', np.int], ('avg', np.float))
             self.banditStats = np.append(self.banditStats, z)
             self.bandits = np.append(self.bandits, np.random.random_sample(1))
 
@@ -69,7 +69,10 @@ class Bandits():
         self.banditStats[bandit]['losses'] += loss 
                                       
     def observe(self, bandit):
-        self.banditStats[bandit]['observations'] += 1
+        self.banditStats[bandit]['obs'] += 1
+    
+    def average(self, bandit):
+        self.setAvg(bandit, self.getWin(bandit)/self.getObs(bandit))
                                       
     def setWin(self, bandit, value):
         self.banditStats[bandit]['wins'] = value
@@ -78,10 +81,10 @@ class Bandits():
         self.banditStats[bandit]['losses'] = value
     
     def setNumObs(self, bandit, value):
-        self.banditStats[bandit]['observations'] = value
+        self.banditStats[bandit]['obs'] = value
     
-    def setAverage(self, bandit, value):
-        self.banditStats[bandit]['average'] = value
+    def setAvg(self, bandit, value):
+        self.banditStats[bandit]['avg'] = value
                                       
     def getWin(self, bandit) :
         return self.banditStats[bandit]['wins']
@@ -90,10 +93,10 @@ class Bandits():
         return self.banditStats[bandit]['losses']
     
     def getNumObs(self, bandit):
-        return self.banditStats[bandit]['observations']
+        return self.banditStats[bandit]['obs']
 
-    def getAverage(self, bandit, value):
-        return self.banditStats[bandit]['average']
+    def getAvg(self, bandit, value):
+        return self.banditStats[bandit]['avg']
                                       
     def select(self, number):
         ''' Select a bandit, retuns whether it produces an award or not '''
