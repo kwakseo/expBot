@@ -17,7 +17,7 @@ sys.setdefaultencoding('utf8')
 INITIAL = 0
 GOT_RESPONSE = 1
 SUGGESTION = 2
-NOT_SATISFIED = 3
+RATE_OWN = 3
 
 MAX_RATING = 5
 VALID_RATINGS = {'1','2','3','4','5'}
@@ -56,19 +56,13 @@ for i in range(numQuestions) :
 
         winKey = statPrefix + '_' + 'win'
         loseKey = statPrefix + '_' + 'lose'
-        obsKey = statPrefix + '_' + 'obs'
-        avgKey = statPrefix + '_' + 'avg'
 
         winCount = int(db[winKey])
         loseCount = int(db[loseKey])
-        obsCount = int(db[obsKey])
-        avgCount = float(db[avgKey])
 
         myBandits[i].addArm()
         myBandits[i].setWin(j, winCount)
         myBandits[i].setLose(j, loseCount)
-        myBandits[i].setNumObs(j, winCount)
-        myBandits[i].setAverage(j, loseCount)
  
 #finally:
 #    s.close()
@@ -95,19 +89,20 @@ def setUserState(userId, s) :
 
 def addResponse(userId, questionIdx, res) :
     if res in responseMapping[questionIdx] :
-        return
+        return res
 
     res = res.encode('utf-8').strip()
 
     db['r' + str(questionIdx) + '_' + str(myBandits[questionIdx].size())] = res
     db['s' + str(questionIdx) + '_' + str(myBandits[questionIdx].size()) + '_win'] = 0
     db['s' + str(questionIdx) + '_' + str(myBandits[questionIdx].size()) + '_lose'] = 0
-
+    
     numResponse = int(db['q' + str(questionIdx) + '_' + 'numResponses'])
     db['q' + str(questionIdx) + '_' + 'numResponses'] = numResponse + 1
 
     myBandits[questionIdx].addArm()
     responseMapping[questionIdx].append(res)
+    return res
 
 def markWin(questionIdx, resIdx, reward) :
     myBandits[questionIdx].win(resIdx, reward)
@@ -118,9 +113,6 @@ def markLose(questionIdx, resIdx, reward) :
     myBandits[questionIdx].lose(resIdx, reward)
     
     db['s' + str(questionIdx) + '_' + str(resIdx) + '_lose'] = myBandits[questionIdx].getLose(resIdx)
-
-def markObservation(questionIdx, resIdx):
-    myBandits[questionIdx].observe(resIdx)
     
 def handleHi(userId, messageInstance, msgString) :
     response = 'Hi! Here are a list of messages that I can handle.\n\n'
@@ -179,16 +171,14 @@ def handleUserResponse(message, something):
         curQuestion = userQuestionIdx[userId]
 
         if responseSize(curQuestion) == 0 :
-            message.reply('No proper response has been registered yet. What is a proper response to this question for you?')
+            message.reply('No response has been registered yet. What is a proper response to this question for you?')
             setUserState(userId, SUGGESTION)
 
         else :
             if flag == True :
                 res = getResponse(curQuestion)
                 resMsg = responseMapping[curQuestion][res]
-
                 userFacingResponseIdx[userId] = res 
-
                 message.reply('*' + resMsg + '*' + '\n\n' + 'How satisfied are you with this response? Enter a number 1-5:\n' 
                              + '1: Very dissatisfied\n' 
                              + '2: Somewhat dissatisfied\n'
@@ -198,17 +188,8 @@ def handleUserResponse(message, something):
                 setUserState(userId, GOT_RESPONSE)
 
             else :
-                message.reply('I do not understand')
+                message.reply('Sorry, I do not understand.')
                 setUserState(userId, INITIAL)
-
-    elif curStatus == SUGGESTION :
-        userQuestion = userQuestionIdx[userId]
-
-        addResponse(userId, userQuestion, msg)
-        
-        message.reply('cool! Thank you for your opinion!')
-
-        setUserState(userId, INITIAL)
 
     elif curStatus == GOT_RESPONSE :
         userQuestion = userQuestionIdx[userId]
@@ -220,17 +201,26 @@ def handleUserResponse(message, something):
             markLose(userQuestion, userResponseIdx, MAX_RATING-rating)
             
             if rating > MAX_RATING//2:
-                message.reply('cool! Thank you for your opinion!')
+                message.reply('Cool, thank you for your opinion!')
                 setUserState(userId, INITIAL)
             else:
                 message.reply('What do you think is an appropriate response?')
-                setUserState(userId, NOT_SATISFIED)
+                setUserState(userId, SUGGESTION)
         else :
-            message.reply('Sorry, I do not understand')
-    
-    elif curStatus == NOT_SATISFIED :
+            message.reply('Sorry, I do not understand.')
+            
+    elif curStatus == SUGGESTION :
         userQuestion = userQuestionIdx[userId]
-        addResponse(userId, userQuestion, msg)
-        message.reply('cool! Thank you for your opinion!')
+        userFacingResponseIdx[userId] = addResponse(userId, userQuestion, msg)
+        message.reply('What would you rate your own response? Enter a number 1-5.')
+        setUserState(userId, RATE_OWN)
+    
+    elif curStatus == RATE_OWN :
+        res = userFacingResponseIdx[userId]            
+        rating = int(msg)
+        markWin(userQuestion, userResponseIdx, rating)
+        markLose(userQuestion, userResponseIdx, MAX_RATING-rating)
+        message.reply('Cool, thank you for your opinion!')
         setUserState(userId, INITIAL)
+        
 
