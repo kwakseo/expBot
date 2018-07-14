@@ -179,12 +179,12 @@ def handleUserResponse(message, something):
                 res = getResponse(curQuestion)
                 resMsg = responseMapping[curQuestion][res]
                 userFacingResponseIdx[userId] = res 
-                message.reply('*' + resMsg + '*' + '\n\n' + 'How satisfied are you with this response? Enter a number 1-5:\n' 
-                             + '1: Very dissatisfied\n' 
-                             + '2: Somewhat dissatisfied\n'
-                             + '3: Neutral\n'
-                             + '4: Somewhat satisfied\n'
-                             + '5: Very satisfied')
+                message.reply('*' + resMsg + '*' + '\n\n' + 'What would you rate this response? Enter a number 1-5:\n' 
+                             + '1: Very poor\n' 
+                             + '2: Poor\n'
+                             + '3: OK\n'
+                             + '4: Good\n'
+                             + '5: Very good')
                 setUserState(userId, GOT_RESPONSE)
 
             else :
@@ -212,7 +212,12 @@ def handleUserResponse(message, something):
     elif curStatus == SUGGESTION :
         userQuestion = userQuestionIdx[userId]
         userFacingResponseIdx[userId] = addResponse(userId, userQuestion, msg)
-        message.reply('What would you rate your own response? Enter a number 1-5.')
+        message.reply('What would you rate your own response? Enter a number 1-5:\n' 
+                             + '1: Very poor\n' 
+                             + '2: Poor\n'
+                             + '3: OK\n'
+                             + '4: Good\n'
+                             + '5: Very good')
         setUserState(userId, RATE_OWN)
     
     elif curStatus == RATE_OWN :
