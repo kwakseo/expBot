@@ -44,11 +44,11 @@ class Bandits():
 
     def addArm(self):
         if self.banditStats.size == 0 :
-            self.banditStats = np.zeros((1,), dtype=[('wins', np.int ), ('losses', np.int), ('observations', np.int)])
+            self.banditStats = np.zeros((1,), dtype=[('wins', np.int ), ('losses', np.int), ('observations', np.int), ('average', np.float)])
             self.bandits = np.random.random_sample(1)
 
         else :
-            z = np.zeros((1,), dtype=[('wins', np.int ), ('losses', np.int), ('observations', np.int])
+            z = np.zeros((1,), dtype=[('wins', np.int ), ('losses', np.int), ('observations', np.int], ('average', np.float))
             self.banditStats = np.append(self.banditStats, z)
             self.bandits = np.append(self.bandits, np.random.random_sample(1))
 
@@ -77,8 +77,11 @@ class Bandits():
     def setLose(self, bandit, value):
         self.banditStats[bandit]['losses'] = value
     
-    def setObservations(self, bandit, value):
+    def setNumObserved(self, bandit, value):
         self.banditStats[bandit]['observations'] = value
+    
+    def setAverage(self, bandit, value):
+        self.banditStats[bandit]['average'] = value
                                       
     def getWin(self, bandit) :
         return self.banditStats[bandit]['wins']
@@ -86,8 +89,11 @@ class Bandits():
     def getLose(self, bandit) :
         return self.banditStats[bandit]['losses']
     
-    def getObservations(self, bandit):
+    def getNumObserved(self, bandit):
         return self.banditStats[bandit]['observations']
+
+    def getAverage(self, bandit, value):
+        return self.banditStats[bandit]['average']
                                       
     def select(self, number):
         ''' Select a bandit, retuns whether it produces an award or not '''
