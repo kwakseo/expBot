@@ -78,12 +78,6 @@ class Bandits():
 
     def setLose(self, bandit, value):
         self.banditStats[bandit]['losses'] = value
-    
-    def setNumObs(self, bandit, value):
-        self.banditStats[bandit]['obs'] = value
-    
-    def setAvg(self, bandit, value):
-        self.banditStats[bandit]['avg'] = value
                                       
     def getWin(self, bandit) :
         return self.banditStats[bandit]['wins']
@@ -92,10 +86,10 @@ class Bandits():
         return self.banditStats[bandit]['losses']
     
     def getObs(self, bandit) :
-        return (self.banditStats[bandit]['wins']+self.banditStats[bandit]['losses'])/MAX_RATING
+        return (self.getWin(bandit)+self.getLose(bandit))/MAX_RATING
     
     def getAvg(self, bandit) :
-        self.setAvg(bandit, self.getWin(bandit)/(MAX_RATING*self.getObs(bandit)))
+        return self.getWin(bandit)/self.getObs(bandit)
                                       
     def select(self, number):
         ''' Select a bandit, retuns whether it produces an award or not '''
