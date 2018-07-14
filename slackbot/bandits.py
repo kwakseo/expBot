@@ -77,7 +77,7 @@ class Bandits():
     def setLose(self, bandit, value):
         self.banditStats[bandit]['losses'] = value
     
-    def setNumObserved(self, bandit, value):
+    def setNumObs(self, bandit, value):
         self.banditStats[bandit]['observations'] = value
     
     def setAverage(self, bandit, value):
@@ -89,7 +89,7 @@ class Bandits():
     def getLose(self, bandit) :
         return self.banditStats[bandit]['losses']
     
-    def getNumObserved(self, bandit):
+    def getNumObs(self, bandit):
         return self.banditStats[bandit]['observations']
 
     def getAverage(self, bandit, value):
