@@ -58,9 +58,12 @@ class Bandits():
 
         return len(self.banditStats)-1
 
-    def getStat(self) :
+    def getWinLoss(self) : # gives array of (wins, losses) for all responses to one question
         return self.banditStats
-
+                           
+    def getResStats(self, bandit) : # gives (avg rating, num observations) for one response
+        return (self.getAvg(bandit), self.getObs(bandit))
+                                      
     def getBanditProbability(self) :
         return self.bandits
 
