@@ -1,6 +1,8 @@
 import sys
 import numpy as np
 
+MAX_RATING = 5
+
 # A set of bandits. Initialize with the count. 
 class Bandits():
     def __init__(self, size):
@@ -15,7 +17,7 @@ class Bandits():
 #        self.max_prob = np.amax(self.bandits)
 
         self.numArms = size
-        self.banditStats = np.zeros((size,), dtype=[('wins', np.int ), ('losses', np.int), ('obs', np.int)])
+        self.banditStats = np.zeros((size,), dtype=[('wins', np.int ), ('losses', np.int)])
 
         def draw_bandit_distribution(stats):
             ''' 
@@ -44,11 +46,11 @@ class Bandits():
 
     def addArm(self):
         if self.banditStats.size == 0 :
-            self.banditStats = np.zeros((1,), dtype=[('wins', np.int ), ('losses', np.int), ('obs', np.int), ('avg', np.float)])
+            self.banditStats = np.zeros((1,), dtype=[('wins', np.int ), ('losses', np.int)])
             self.bandits = np.random.random_sample(1)
 
         else :
-            z = np.zeros((1,), dtype=[('wins', np.int ), ('losses', np.int), ('obs', np.int], ('avg', np.float))
+            z = np.zeros((1,), dtype=[('wins', np.int ), ('losses', np.int))
             self.banditStats = np.append(self.banditStats, z)
             self.bandits = np.append(self.bandits, np.random.random_sample(1))
 
@@ -67,13 +69,7 @@ class Bandits():
 
     def lose(self, bandit, loss):
         self.banditStats[bandit]['losses'] += loss 
-                                      
-    def observe(self, bandit):
-        self.banditStats[bandit]['obs'] += 1
-    
-    def average(self, bandit):
-        self.setAvg(bandit, self.getWin(bandit)/self.getObs(bandit))
-                                      
+                                    
     def setWin(self, bandit, value):
         self.banditStats[bandit]['wins'] = value
 
@@ -92,11 +88,11 @@ class Bandits():
     def getLose(self, bandit) :
         return self.banditStats[bandit]['losses']
     
-    def getNumObs(self, bandit):
-        return self.banditStats[bandit]['obs']
-
-    def getAvg(self, bandit, value):
-        return self.banditStats[bandit]['avg']
+    def getObs(self, bandit) :
+        return (self.banditStats[bandit]['wins']+self.banditStats[bandit]['losses'])/MAX_RATING
+    
+    def getAvg(self, bandit) :
+        self.setAvg(bandit, self.getWin(bandit)/(MAX_RATING*self.getObs(bandit)))
                                       
     def select(self, number):
         ''' Select a bandit, retuns whether it produces an award or not '''
